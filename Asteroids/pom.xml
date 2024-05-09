@@ -8,15 +8,16 @@
     </parent>
     <artifactId>Asteroids</artifactId>
     <packaging>jar</packaging>
+    <name>Asteroids</name>
     <dependencies>
-            <dependency>
+        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>Common</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>CommonAsteroids</artifactId>
+            <artifactId>CommonBullet</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
