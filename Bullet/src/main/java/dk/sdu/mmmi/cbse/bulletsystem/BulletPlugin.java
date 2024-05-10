@@ -12,7 +12,7 @@ public class BulletPlugin implements IGamePluginService {
 
     @Override
     public void start(GameData gameData, World world) {
-
+//        world.addEntity(bullet);
     }
 
     @Override
