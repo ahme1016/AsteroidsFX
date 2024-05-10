@@ -1,6 +1,5 @@
 package dk.sdu.mmmi.cbse.asteroid;
 
-import dk.sdu.mmmi.cbse.common.bullet.Bullet;
 import dk.sdu.mmmi.cbse.common.data.Entity;
 import dk.sdu.mmmi.cbse.common.data.GameData;
 import dk.sdu.mmmi.cbse.common.data.World;
@@ -34,7 +33,7 @@ public class Asteroid extends Entity {
     private void handleAsteroidSizeTwo(GameData gameData, World world, Entity collidingEntity) {
         for (int i = 0; i < 2; i++) {
             Entity asteroidChild = asteroidPlugin.createAsteroid(gameData);
-            asteroidPlugin.setNewPolygonCoordinates(asteroidChild, 1);
+            asteroidPlugin.setAsteroidCoordinates(asteroidChild, 1);
             asteroidChild.setX(this.getX());
             asteroidChild.setY(this.getY());
             asteroidChild.setRotation(Math.random() * 360);
@@ -47,7 +46,7 @@ public class Asteroid extends Entity {
     private void handleDefaultAsteroidSize(GameData gameData, World world, Entity collidingEntity) {
         for (int i = 0; i < 2; i++) {
             Entity asteroidChild = asteroidPlugin.createAsteroid(gameData);
-            asteroidPlugin.setNewPolygonCoordinates(asteroidChild, 2);
+            asteroidPlugin.setAsteroidCoordinates(asteroidChild, 2);
             asteroidChild.setX(this.getX());
             asteroidChild.setY(this.getY());
             asteroidChild.setRotation(Math.random() * 360);

@@ -27,13 +27,13 @@ public class AsteroidPlugin implements IGamePluginService {
 
         int randomizer = (int) (Math.random() * (4-1) + 1);
 //        setNewPolygonCoordinates(asteroid, randomizer);
-        setNewPolygonCoordinates(asteroid, 3);
+        setAsteroidCoordinates(asteroid, 3);
 
-        setStartPoint(gameData, asteroid);
+        setAsteroidPosition(gameData, asteroid);
         return asteroid;
     }
 
-    public void setNewPolygonCoordinates(Entity asteroid, int newAsteroidSize) {
+    public void setAsteroidCoordinates(Entity asteroid, int newAsteroidSize) {
 
         switch(newAsteroidSize) {
             case 1:
@@ -57,7 +57,7 @@ public class AsteroidPlugin implements IGamePluginService {
         }
     }
 
-    private Entity setStartPoint(GameData gamedata, Entity asteroid) {
+    private void setAsteroidPosition(GameData gamedata, Entity asteroid) {
         Random random = new Random();
 
         int randomX;
@@ -94,16 +94,8 @@ public class AsteroidPlugin implements IGamePluginService {
         asteroid.setY(randomY);
         asteroid.setRotation(randomRotation);
 
-        return asteroid;
     }
 
-
-    public Entity spawnAsteroid(GameData gameData, World world) {
-        Entity asteroid = createAsteroid(gameData);
-        setStartPoint(gameData, asteroid);
-        world.addEntity(asteroid);
-        return asteroid;
-    }
 
     @Override
     public void stop(GameData gameData, World world) {

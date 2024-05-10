@@ -15,32 +15,35 @@ import static java.util.stream.Collectors.toList;
 
 public class AsteroidControlSystem implements IEntityProcessingService, IPostEntityProcessingService {
 
-    private static final int MIN_ASTEROIDS = 3; // Adjust as needed
+    private static final int MIN_ASTEROIDS = 3;
 
     private AsteroidPlugin asteroidPlugin = new AsteroidPlugin();
 
     @Override
     public void process(GameData gameData, World world) {
+        // Ensure minimum number of asteroids in the game world
         spawnAsteroids(gameData, world);
 
+        // Update position of each asteroid
         for (Entity asteroid : world.getEntities(Asteroid.class)) {
+            // Calculate change in position based on current rotation
             double changeX = Math.cos(Math.toRadians(asteroid.getRotation()));
             double changeY = Math.sin(Math.toRadians(asteroid.getRotation()));
+
+            // Update asteroid's position
             asteroid.setX(asteroid.getX() + changeX);
             asteroid.setY(asteroid.getY() + changeY);
 
+            // Wrap around screen boundaries if asteroid moves beyond them
             if (asteroid.getX() < 0) {
                 asteroid.setX(gameData.getDisplayWidth());
             }
-
             if (asteroid.getX() > gameData.getDisplayWidth()) {
                 asteroid.setX(0);
             }
-
             if (asteroid.getY() < 0) {
                 asteroid.setY(gameData.getDisplayHeight());
             }
-
             if (asteroid.getY() > gameData.getDisplayHeight()) {
                 asteroid.setY(0);
             }
@@ -49,20 +52,32 @@ public class AsteroidControlSystem implements IEntityProcessingService, IPostEnt
 
     @Override
     public void postProcess(GameData gameData, World world) {
-        // Remove any asteroids that have gone out of bounds
+
         for (Entity asteroid : new ArrayList<>(world.getEntities(Asteroid.class))) {
+            // Check if asteroid is out of bounds
             if (asteroid.getX() < 0 || asteroid.getX() > gameData.getDisplayWidth() ||
                     asteroid.getY() < 0 || asteroid.getY() > gameData.getDisplayHeight()) {
+                // Remove asteroid from the world
                 world.removeEntity(asteroid);
             }
         }
     }
 
     private void spawnAsteroids(GameData gameData, World world) {
+        // Get the current count of asteroids in the game world
         int asteroidCount = world.getEntities(Asteroid.class).size();
+
+        // Check if the current count is less than the minimum required
         if (asteroidCount < MIN_ASTEROIDS) {
-            for (int i = 0; i < MIN_ASTEROIDS - asteroidCount; i++) {
+            // Calculate the number of asteroids needed to reach the minimum
+            int asteroidsToSpawn = MIN_ASTEROIDS - asteroidCount;
+
+            // Spawn the required number of asteroids
+            for (int i = 0; i < asteroidsToSpawn; i++) {
+                // Create a new asteroid entity using the plugin
                 Entity asteroid = asteroidPlugin.createAsteroid(gameData);
+
+                // Add the asteroid to the game world
                 world.addEntity(asteroid);
             }
         }
