@@ -10,7 +10,6 @@ import java.util.ArrayList;
 public class EnemyShip extends Entity {
 
     private long bulletFiredTime;
-    private int timesHit;
     private ArrayList<Bullet> bullets = new ArrayList<>();
 
     public long getBulletFiredTime() {
@@ -29,12 +28,8 @@ public class EnemyShip extends Entity {
     }
 
     private void handleBulletCollision(Bullet bullet, World world) {
-        if (timesHit < 3) {
-            world.removeEntity(bullet);
-            timesHit++;
-        } else {
-            destroyEnemy(world);
-        }
+        world.removeEntity(bullet); // Remove the bullet upon collision
+        destroyEnemy(world); // Destroy the enemy ship on the first hit itself
     }
 
     private void destroyEnemy(World world) {
