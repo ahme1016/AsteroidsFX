@@ -55,10 +55,10 @@ public class EnemyShipControlSystem implements IEntityProcessingService {
         }
     }
 
-    public boolean fireBullet(long currentTime, EnemyShip enemySpaceship) {
-        long fireNewBulletTime = enemySpaceship.getBulletFiredTime() + 1000;
-        if (enemySpaceship.getBulletFiredTime() == 0 || currentTime >= fireNewBulletTime) {
-            enemySpaceship.setBulletFiredTime(currentTime);
+    public boolean fireBullet(long currentTime, EnemyShip enemyShip) {
+        long fireNewBulletTime = enemyShip.getBulletFiredTime() + 1000;
+        if (enemyShip.getBulletFiredTime() == 0 || currentTime >= fireNewBulletTime) {
+            enemyShip.setBulletFiredTime(currentTime);
             return true;
         } else {
             return false;
