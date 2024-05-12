@@ -7,5 +7,5 @@ module Asteroid {
     requires Common;
     requires CommonBullet;
     provides IGamePluginService with dk.sdu.mmmi.cbse.asteroid.AsteroidPlugin;
-    provides IEntityProcessingService with dk.sdu.mmmi.cbse.asteroid.AsteroidControlSystem;
+    provides IEntityProcessingService with dk.sdu.mmmi.cbse.asteroid.AsteroidControlSystem, dk.sdu.mmmi.cbse.SplitPackage.SplitPackage;
 }
