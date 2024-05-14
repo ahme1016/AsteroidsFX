@@ -10,28 +10,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class ScoringSystem {
 
-    private int totalScore = 0;
+    private Long totalScore = 0L;
 
     public static void main(String[] args) {
         SpringApplication.run(ScoringSystem.class, args);
     }
 
-    @GetMapping("/update-score")
-    public int UpdateTotalScore(@RequestParam(value = "point") Long point) {
+    @GetMapping("/score")
+    public Long calculateHealt(@RequestParam(value = "point") Long point) {
         totalScore += point;
         return totalScore ;
     }
-
-    @GetMapping("/score")
-    public String getTotalScore() {
-        return String.valueOf(totalScore);
-    }
-
-    @GetMapping("/reset")
-    public void resetScore() {
-        totalScore = 0;
-    }
-
-
 
 }
