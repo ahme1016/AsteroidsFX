@@ -20,10 +20,21 @@ import javafx.scene.layout.Pane;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 public class Main extends Application {
 
+    private final GameData gameData = new GameData();
+    private final World world = new World();
+    private final Map<Entity, Polygon> polygons = new ConcurrentHashMap<>();
+    private Pane gameWindow;
+    private int currentEntityAmount;
+    private int totalScore;
+    Text scoreText;
 
 
     public static void main(String[] args) {
@@ -32,15 +43,189 @@ public class Main extends Application {
 
     @Override
     public void start(Stage window) throws Exception {
+        resetTotalScore();
+        totalScore = getTotalScore();
+        scoreText = new Text(10, 20, "Your points: " + totalScore);
+        //gameWindow = new Pane();
+        gameWindow.setPrefSize(gameData.getDisplayWidth(), gameData.getDisplayHeight());
+        gameWindow.getChildren().add(scoreText);
 
-        AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ModuleConfig.class);
+        Scene scene = new Scene(gameWindow);
+        scene.setOnKeyPressed(event -> {
+            if (event.getCode().equals(KeyCode.LEFT)) {
+                gameData.getKeys().setKey(GameKeys.LEFT, true);
+            }
+            if (event.getCode().equals(KeyCode.RIGHT)) {
+                gameData.getKeys().setKey(GameKeys.RIGHT, true);
+            }
+            if (event.getCode().equals(KeyCode.UP)) {
+                gameData.getKeys().setKey(GameKeys.UP, true);
+            }
+            if (event.getCode().equals(KeyCode.SPACE)) {
+                gameData.getKeys().setKey(GameKeys.SPACE, true);
+            }
+        });
+        scene.setOnKeyReleased(event -> {
+            if (event.getCode().equals(KeyCode.LEFT)) {
+                gameData.getKeys().setKey(GameKeys.LEFT, false);
+            }
+            if (event.getCode().equals(KeyCode.RIGHT)) {
+                gameData.getKeys().setKey(GameKeys.RIGHT, false);
+            }
+            if (event.getCode().equals(KeyCode.UP)) {
+                gameData.getKeys().setKey(GameKeys.UP, false);
+            }
+            if (event.getCode().equals(KeyCode.SPACE)) {
+                gameData.getKeys().setKey(GameKeys.SPACE, false);
+            }
 
-        for (String beanName : ctx.getBeanDefinitionNames()) {
-            System.out.println(beanName);
+        });
+
+        // Lookup all Game Plugins using ServiceLoader
+        for (IGamePluginService iGamePlugin : getPluginServices()) {
+            iGamePlugin.start(gameData, world);
         }
 
-        Game game = ctx.getBean(Game.class);
-        game.start(window);
-        game.render();
+        // Add EnemyShipPlugin
+
+
+        for (Entity entity : world.getEntities()) {
+            Polygon polygon = new Polygon(entity.getPolygonCoordinates());
+            polygons.put(entity, polygon);
+            gameWindow.getChildren().add(polygon);
+        }
+
+        render();
+
+        window.setScene(scene);
+        window.setTitle("ASTEROIDS");
+        window.show();
+
+    }
+
+    private void render() {
+        new AnimationTimer() {
+            private long then = 0;
+
+            @Override
+            public void handle(long now) {
+                update();
+                draw();
+                gameData.getKeys().update();
+                updateScoreText();
+            }
+
+        }.start();
+    }
+
+    private void update() {
+
+        currentEntityAmount = world.getEntities().size();
+
+        // Update Services
+        for (IEntityProcessingService entityProcessorService : getEntityProcessingServices()) {
+            entityProcessorService.process(gameData, world);
+        }
+
+        for (IPostEntityProcessingService postEntityProcessorService : getPostEntityProcessingServices()) {
+            postEntityProcessorService.process(gameData, world);
+        }
+
+        // Check if new Entities have been added but doesn't yet have a polygon.
+        for (Entity entity : world.getEntities()) {
+            if(polygons.get(entity) == null) {
+                Polygon polygon = new Polygon(entity.getPolygonCoordinates());
+                polygons.put(entity, polygon);
+                gameWindow.getChildren().add(polygon);
+            }
+        }
+
+        // Check if entities are out of Bounds and delete them
+        for (Entity entity : world.getEntities()) {
+            if(entity.outOfBounds(gameData.getDisplayHeight(), gameData.getDisplayWidth())) {
+                gameWindow.getChildren().remove(polygons.get(entity));      //remove drawing of polygon from game pane
+                polygons.remove(entity);                                    //remove polygon from polygons
+                world.removeEntity(entity);                                 //remove entity from world
+            }
+        }
+    }
+
+    private void draw() {
+        for (Entity entity : world.getEntities()) {
+            Polygon polygon = polygons.get(entity);
+            polygon.setTranslateX(entity.getX());
+            polygon.setTranslateY(entity.getY());
+            polygon.setRotate(entity.getRotation());
+        }
+
+        //Delete polygons for entities that has been removed
+        for (Entity polygonEntity : polygons.keySet()) {
+            if (!world.getEntities().contains(polygonEntity)) {
+                Polygon removedPolygon = polygons.get(polygonEntity);
+                polygons.remove(polygonEntity);
+                gameWindow.getChildren().remove(removedPolygon);
+            }
+        }
+    }
+
+    private void updateScoreText(){
+        totalScore = getTotalScore();
+        scoreText.setText("Your points: " + totalScore);
+    }
+
+    private int getTotalScore() {
+        URL url;
+        int score;
+        try {
+            url = new URL("http://localhost:8080/score");
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+
+            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            String inputLine;
+            StringBuilder response = new StringBuilder();
+
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            in.close();
+            connection.disconnect();
+            score = Integer.parseInt(String.valueOf(response));
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return score;
+    }
+
+    public void resetTotalScore() {
+        try {
+            URL updateUrl = new URL("http://localhost:8080/reset");
+            HttpURLConnection connection = (HttpURLConnection) updateUrl.openConnection();
+            connection.setRequestMethod("GET");
+
+            int responseCode = connection.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                System.out.println("Score reset successfully.");
+            } else {
+                System.out.println("Failed to reset score. Response code: " + responseCode);
+            }
+
+            connection.disconnect();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private Collection<? extends IGamePluginService> getPluginServices() {
+        return ServiceLoader.load(IGamePluginService.class).stream().map(ServiceLoader.Provider::get).collect(toList());
+    }
+
+    private Collection<? extends IEntityProcessingService> getEntityProcessingServices() {
+        return ServiceLoader.load(IEntityProcessingService.class).stream().map(ServiceLoader.Provider::get).collect(toList());
+    }
+
+    private Collection<? extends IPostEntityProcessingService> getPostEntityProcessingServices() {
+        return ServiceLoader.load(IPostEntityProcessingService.class).stream().map(ServiceLoader.Provider::get).collect(toList());
     }
 }

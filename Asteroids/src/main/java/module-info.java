@@ -6,6 +6,7 @@ module Asteroid {
     exports dk.sdu.mmmi.cbse.asteroid;
     requires Common;
     requires CommonBullet;
+    requires spring.web;
     provides IGamePluginService with dk.sdu.mmmi.cbse.asteroid.AsteroidPlugin;
     provides IEntityProcessingService with dk.sdu.mmmi.cbse.asteroid.AsteroidControlSystem;
 }
