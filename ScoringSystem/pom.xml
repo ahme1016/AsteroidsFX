@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>dk.sdu.mmmi.cbse</groupId>
-    <artifactId>scoringsystem</artifactId>
+    <artifactId>ScoringSystem</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>ScoringSystem</name>
     <properties>
