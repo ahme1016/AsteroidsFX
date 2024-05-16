@@ -7,19 +7,25 @@ import dk.sdu.mmmi.cbse.common.data.World;
 
 public class Asteroid extends Entity {
 
-    private int asteroidSize;
+    public enum AsteroidSize {SMALL, MEDIUM, LARGE} // Use an enum for clarity
+
+    private AsteroidSize asteroidSize;
     private AsteroidPlugin asteroidPlugin = new AsteroidPlugin();
+
+    public Asteroid(AsteroidSize size) { // Constructor to set size
+        this.asteroidSize = size;
+    }
 
     @Override
     public void handleCollision(GameData gameData, World world, Entity collidingEntity) {
-        switch (getAsteroidSize()) {
-            case 1:
+        switch (asteroidSize) { // Switch on enum values
+            case SMALL:
                 handleAsteroidSizeOne(world, collidingEntity);
                 break;
-            case 2:
+            case MEDIUM:
                 handleAsteroidSizeTwo(gameData, world, collidingEntity);
                 break;
-            default:
+            case LARGE: // Use the original default behavior
                 handleDefaultAsteroidSize(gameData, world, collidingEntity);
                 break;
         }
@@ -32,8 +38,9 @@ public class Asteroid extends Entity {
 
     private void handleAsteroidSizeTwo(GameData gameData, World world, Entity collidingEntity) {
         for (int i = 0; i < 2; i++) {
-            Entity asteroidChild = asteroidPlugin.createAsteroid(gameData);
-            asteroidPlugin.setAsteroidCoordinates(asteroidChild, 1);
+            Asteroid asteroidChild = (Asteroid) asteroidPlugin.createAsteroid(gameData);
+            asteroidChild.setAsteroidSize(AsteroidSize.SMALL); // Set child size to SMALL
+            asteroidPlugin.setAsteroidCoordinates(asteroidChild);
             asteroidChild.setX(this.getX());
             asteroidChild.setY(this.getY());
             asteroidChild.setRotation(Math.random() * 360);
@@ -45,8 +52,9 @@ public class Asteroid extends Entity {
 
     private void handleDefaultAsteroidSize(GameData gameData, World world, Entity collidingEntity) {
         for (int i = 0; i < 2; i++) {
-            Entity asteroidChild = asteroidPlugin.createAsteroid(gameData);
-            asteroidPlugin.setAsteroidCoordinates(asteroidChild, 2);
+            Asteroid asteroidChild = (Asteroid) asteroidPlugin.createAsteroid(gameData);
+            asteroidChild.setAsteroidSize(AsteroidSize.MEDIUM); // Set child size to MEDIUM
+            asteroidPlugin.setAsteroidCoordinates(asteroidChild);
             asteroidChild.setX(this.getX());
             asteroidChild.setY(this.getY());
             asteroidChild.setRotation(Math.random() * 360);
@@ -56,11 +64,11 @@ public class Asteroid extends Entity {
         world.removeEntity(this);
     }
 
-    public int getAsteroidSize() {
+    public AsteroidSize getAsteroidSize() {
         return asteroidSize;
     }
 
-    public void setAsteroidSize(int asteroidSize) {
+    public void setAsteroidSize(AsteroidSize asteroidSize) {
         this.asteroidSize = asteroidSize;
     }
 }
