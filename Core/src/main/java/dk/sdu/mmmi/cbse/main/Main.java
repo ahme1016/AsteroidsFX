@@ -8,21 +8,16 @@ import dk.sdu.mmmi.cbse.common.services.IEntityProcessingService;
 import dk.sdu.mmmi.cbse.common.services.IGamePluginService;
 import dk.sdu.mmmi.cbse.common.services.IPostEntityProcessingService;
 import dk.sdu.mmmi.cbse.enemysystem.EnemyShipPlugin;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.concurrent.ConcurrentHashMap;
 import static java.util.stream.Collectors.toList;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
-import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
-import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
@@ -137,12 +132,12 @@ public class Main extends Application {
             }
         }
 
-        // Check if entities are out of Bounds and delete them
+        // Check if entities are out of Bounds and if so delete them
         for (Entity entity : world.getEntities()) {
             if(entity.outOfBounds(gameData.getDisplayHeight(), gameData.getDisplayWidth())) {
-                gameWindow.getChildren().remove(polygons.get(entity));      //remove drawing of polygon from game pane
-                polygons.remove(entity);                                    //remove polygon from polygons
-                world.removeEntity(entity);                                 //remove entity from world
+                gameWindow.getChildren().remove(polygons.get(entity));
+                polygons.remove(entity);
+                world.removeEntity(entity);
             }
         }
     }
